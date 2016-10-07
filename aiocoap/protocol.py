@@ -572,12 +572,13 @@ class Request(BaseRequest, interfaces.Request):
     Class includes methods that handle sending outgoing blockwise requests and
     receiving incoming blockwise responses."""
 
-    def __init__(self, protocol, app_request, exchange_monitor_factory=(lambda message: None), handle_blockwise=True):
+    def __init__(self, protocol, app_request, exchange_monitor_factory=(lambda message: None), handle_blockwise=True, do_not_expect_response=False):
         self.protocol = protocol
         self.log = self.protocol.log.getChild("requester")
         self.app_request = app_request
         self._assembled_response = None
         self.handle_blockwise = handle_blockwise
+        self.do_not_expect_response = do_not_expect_response
 
         self._exchange_monitor_factory = exchange_monitor_factory
 
@@ -659,9 +660,13 @@ class Request(BaseRequest, interfaces.Request):
         else:
             if self._requesttimeout:
                 cancel_thoroughly(self._requesttimeout)
-            self.log.debug("Timeout is %r"%REQUEST_TIMEOUT)
-            self._requesttimeout = self.protocol.loop.call_later(REQUEST_TIMEOUT, timeout_request)
-            self.protocol.outgoing_requests[(request.token, request.remote)] = self
+
+            if self.do_not_expect_response:
+                self.log.debug("Sending no response request - Token: %s, Remote: %s" % (binascii.b2a_hex(request.token).decode('ascii'), request.remote))
+            else:
+                self.log.debug("Timeout is %r"%REQUEST_TIMEOUT)
+                self._requesttimeout = self.protocol.loop.call_later(REQUEST_TIMEOUT, timeout_request)
+                self.protocol.outgoing_requests[(request.token, request.remote)] = self
 
             self.log.debug("Sending request - Token: %s, Remote: %s" % (binascii.b2a_hex(request.token).decode('ascii'), request.remote))
 
