@@ -23,7 +23,7 @@ setup(
     name=name,
     version=version,
     description=description,
-    packages=find_packages(exclude="tests"),
+    packages=find_packages(exclude=["tests"]),
 
     author="Maciej Wasilak, Christian Amsüss",
     author_email="Christian Amsüss <c.amsuess@energyharvesting.at>",
