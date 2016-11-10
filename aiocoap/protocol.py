@@ -958,7 +958,7 @@ class Responder(object):
             self.log.exception(e)
         else:
             if not response.code.is_response():
-                self.log.warning("Response does not carry response code (%r), application probably violates protocol."%response.code)
+                self.log.debug("Response does not carry response code (%r), application probably violates protocol."%response.code)
 
             if needs_blockwise:
                 self.respond(response, request)
